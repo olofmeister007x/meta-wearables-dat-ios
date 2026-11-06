@@ -1,0 +1,37 @@
+
+name: Meta Camera iOS Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Repository herunterladen
+        uses: actions/checkout@v4
+
+      - name: Xcode auswählen
+        run: |
+          xcodebuild -version
+          xcodebuild -list \
+            -project samples/CameraAccess/CameraAccess.xcodeproj
+
+      - name: Kamera-App kompilieren
+        run: |
+          xcodebuild \
+            -project samples/CameraAccess/CameraAccess.xcodeproj \
+            -scheme CameraAccess \
+            -configuration Debug \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: App-Datei speichern
+        uses: actions/upload-artifact@v4
+        with:
+          name: Meta-CameraAccess-unsigned
+          path: build/Build/Products/Debug-iphoneos/CameraAccess.app
+          if-no-files-found: error
